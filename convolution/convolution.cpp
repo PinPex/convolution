@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include "furie.h"
 using namespace std;
 
 class Convolution {
@@ -7,10 +8,10 @@ private:
     int size1;
     double* b;
     int size2;
-    int Nout;
     double* c;
     int count_operations = 0;
 public:
+    int Nout;
     Convolution() {
         cout << "Input size of the first massive: ";
         cin >> size1;
@@ -48,6 +49,27 @@ public:
     void printFirst() {
         cout << "First massive: " << endl;
         for (int i = 0; i < size1; ++i) {
+            if (i % 4 == 0)
+                cout << a[i] << endl;
+            else
+                cout << a[i] << " ";
+        }
+        cout << endl;
+    }
+    void printSecond(int size) {
+        cout << "Second massive: " << endl;
+        for (int i = 0; i < size; ++i) {
+            if (i % 4 == 0)
+                cout << b[i] << endl;
+            else
+                cout << b[i] << " ";
+        }
+        cout << endl;
+    }
+
+    void printFirst(int size) {
+        cout << "First massive: " << endl;
+        for (int i = 0; i < size; ++i) {
             if (i % 4 == 0)
                 cout << a[i] << endl;
             else
@@ -106,6 +128,43 @@ public:
             c[i] = sum;
         }
     }
+
+    double* makeZeros(double* mas, int size) {
+        double* temp = new double[this->Nout];
+        for (int i = 0; i < this->Nout - size; ++i) {
+            temp[i] = 0;
+        }
+
+        for (int i = this->Nout - size; i < this->Nout; ++i) {
+            temp[i] = mas[i - (this->Nout - size)];
+        }
+        
+        delete[] mas;
+        return temp;
+    }
+
+    void simpleFurieConvolution() {
+        this->a = makeZeros(a, size1);
+        this->b = makeZeros(b, size2);
+        int n = this->Nout;
+        Furie furA(n, a);
+        //furA.printMas();
+        Furie furB(n, b);
+        //furB.printMas();
+        furA.dis_fur();
+        //furA.printMas();
+        furB.dis_fur();
+        //furB.printMas();
+        furA.Mul(furB.mas);
+        //furA.printMas();
+        furA.back_dis_fur();
+        //furA.printMas();
+        for (int i = 0; i < n; ++i) {
+            c[i] = furA.mas[i].R;
+        }
+    }
+
+    
 };
 
 int main()
@@ -119,4 +178,13 @@ int main()
     conv.printOut();
     conv.printOperations();
     conv.countNull();
+
+    conv.simpleFurieConvolution();
+
+    conv.printFirst(conv.Nout);
+    conv.printSecond(conv.Nout);
+    conv.printOut();
+    conv.printOperations();
+    conv.countNull();
+    
 }
