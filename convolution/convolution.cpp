@@ -70,30 +70,22 @@ public:
     void printFirst(int size) {
         cout << "First massive: " << endl;
         for (int i = 0; i < size; ++i) {
-            if (i % 4 == 0)
-                cout << a[i] << endl;
-            else
-                cout << a[i] << " ";
+            cout << a[i] << " ";
         }
         cout << endl;
     }
     void printSecond() {
         cout << "Second massive: " << endl;
         for (int i = 0; i < size2; ++i) {
-            if (i % 4 == 0)
-                cout << b[i] << endl;
-            else
-                cout << b[i] << " ";
+            cout << b[i] << " ";
         }
         cout << endl;
     }
     void printOut() {
         cout << "Out massive: " << endl;
         for (int i = 0; i < Nout; ++i) {
-            if (i % 4 == 0)
-                cout << c[i] << endl;
-            else
-                cout << c[i] << " ";
+            cout << c[i] << " ";
+                
         }
         cout << endl;
     }
@@ -115,7 +107,22 @@ public:
             this->fillCur();
     }
 
+    double max(double a, ...) {
+        double* p = &a;
+        double max = *p;
+        p++;
+        while (*p) {
+            if (*p > max) {
+                max = *p;
+            }
+            p++;
+        }
+        return max;
+    }
+
+
     void simpleConvolution() {
+        //cout << max(2., 5., 12., 22., 11., 111., 444., 1000.) << endl;
         for (int i = 0; i < Nout; ++i) {
             double sum = 0;
             for (int k = 0; k < size1; ++k) {
@@ -123,21 +130,26 @@ public:
                     sum += a[k] * b[i - k];
                     count_operations += 3;
                 }
+                else
+                    break;
                     
             }
             c[i] = sum;
         }
     }
 
+
     double* makeZeros(double* mas, int size) {
         double* temp = new double[this->Nout];
-        for (int i = 0; i < this->Nout - size; ++i) {
-            temp[i] = 0;
+        memset(temp, 0, sizeof(temp));
+
+        
+
+        for (int i = 0; i < size; ++i) {
+            temp[i] = mas[i];
         }
 
-        for (int i = this->Nout - size; i < this->Nout; ++i) {
-            temp[i] = mas[i - (this->Nout - size)];
-        }
+        
         
         delete[] mas;
         return temp;
@@ -151,16 +163,16 @@ public:
         //furA.printMas();
         Furie furB(n, b);
         //furB.printMas();
-        furA.dis_fur();
+        furA.DFT();
         //furA.printMas();
-        furB.dis_fur();
+        furB.DFT();
         //furB.printMas();
         furA.Mul(furB.mas);
         //furA.printMas();
-        furA.back_dis_fur();
+        furA.reverse_DFT();
         //furA.printMas();
         for (int i = 0; i < n; ++i) {
-            c[i] = furA.mas[i].R;
+            c[i] = furA.mas[i].real;
         }
     }
 
@@ -178,7 +190,7 @@ int main()
     conv.printOut();
     conv.printOperations();
     conv.countNull();
-
+    cout << endl << endl;
     conv.simpleFurieConvolution();
 
     conv.printFirst(conv.Nout);
