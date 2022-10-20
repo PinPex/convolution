@@ -9,7 +9,7 @@ private:
     double* b;
     int size2;
     double* c;
-    int count_operations = 0;
+    int count_operations = -5;
 public:
     int Nout;
     Convolution() {
@@ -49,20 +49,14 @@ public:
     void printFirst() {
         cout << "First massive: " << endl;
         for (int i = 0; i < size1; ++i) {
-            if (i % 4 == 0)
-                cout << a[i] << endl;
-            else
-                cout << a[i] << " ";
+            cout << fixed << a[i] << " ";
         }
         cout << endl;
     }
     void printSecond(int size) {
         cout << "Second massive: " << endl;
         for (int i = 0; i < size; ++i) {
-            if (i % 4 == 0)
-                cout << b[i] << endl;
-            else
-                cout << b[i] << " ";
+            cout << fixed << b[i] << " ";
         }
         cout << endl;
     }
@@ -70,21 +64,21 @@ public:
     void printFirst(int size) {
         cout << "First massive: " << endl;
         for (int i = 0; i < size; ++i) {
-            cout << a[i] << " ";
+            cout << fixed << a[i] << " ";
         }
         cout << endl;
     }
     void printSecond() {
         cout << "Second massive: " << endl;
         for (int i = 0; i < size2; ++i) {
-            cout << b[i] << " ";
+            cout << fixed << b[i] << " ";
         }
         cout << endl;
     }
     void printOut() {
         cout << "Out massive: " << endl;
         for (int i = 0; i < Nout; ++i) {
-            cout << c[i] << " ";
+            cout << fixed << c[i] << " ";
                 
         }
         cout << endl;
@@ -128,7 +122,7 @@ public:
             for (int k = 0; k < size1; ++k) {
                 if (i - k >= 0) {
                     sum += a[k] * b[i - k];
-                    count_operations += 3;
+                    count_operations += 2;
                 }
                 else
                     break;
@@ -138,42 +132,67 @@ public:
         }
     }
 
+    double* fillZeros(double* mas, int size) {
+        for (int i = 0; i < size; ++i) {
+            mas[i] = 0;
+        }
+        return mas;
+    }
+
 
     double* makeZeros(double* mas, int size) {
         double* temp = new double[this->Nout];
-        memset(temp, 0, sizeof(temp));
+        temp = fillZeros(temp, this->Nout);
 
         
 
         for (int i = 0; i < size; ++i) {
             temp[i] = mas[i];
         }
-
-        
-        
-        delete[] mas;
         return temp;
     }
 
     void simpleFurieConvolution() {
-        this->a = makeZeros(a, size1);
-        this->b = makeZeros(b, size2);
-        int n = this->Nout;
-        Furie furA(n, a);
-        //furA.printMas();
-        Furie furB(n, b);
-        //furB.printMas();
+        double* a1 = makeZeros(a, size1);
+        double* b1 = makeZeros(b, size1);
+        Furie furA(this->Nout, a1);
+        Furie furB(this->Nout, b1);
         furA.DFT();
-        //furA.printMas();
         furB.DFT();
-        //furB.printMas();
         furA.Mul(furB.mas);
-        //furA.printMas();
         furA.reverse_DFT();
-        //furA.printMas();
-        for (int i = 0; i < n; ++i) {
+        for (int i = 0; i < this->Nout; ++i) {
             c[i] = furA.mas[i].real;
         }
+        count_operations = furA.count_operations + furB.count_operations + this->Nout;
+    }
+    void halfFastFurieConvolution() {
+        double* a1 = makeZeros(a, size1);
+        double* b1 = makeZeros(b, size1);
+        Furie furA(this->Nout, a1);
+        Furie furB(this->Nout, b1);
+        furA.half_fast_furie();
+        furB.half_fast_furie();
+        furA.Mul(furB.mas);
+        furA.reverse_half_fast_furie();
+        for (int i = 0; i < this->Nout; ++i) {
+            c[i] = furA.mas[i].real;
+        }
+        count_operations = furA.count_operations + furB.count_operations + this->Nout;
+    }
+    void FastFurieConvolution() {
+        double* a1 = makeZeros(a, size1);
+        double* b1 = makeZeros(b, size1);
+        Furie furA(this->Nout, a1);
+        Furie furB(this->Nout, b1);
+        furA.FFT(0);
+        furB.FFT(0);
+        furA.Mul(furB.mas);
+        furA.FFT(1);
+        for (int i = 0; i < this->Nout; ++i) {
+            c[i] = furA.mas[i].real;
+        }
+        count_operations = furA.count_operations + furB.count_operations + this->Nout;
     }
 
     
@@ -190,8 +209,19 @@ int main()
     conv.printOut();
     conv.printOperations();
     conv.countNull();
+
     cout << endl << endl;
+    cout << "//in development//" << endl;
     conv.simpleFurieConvolution();
+
+    conv.printFirst(conv.Nout);
+    conv.printSecond(conv.Nout);
+    conv.printOut();
+    conv.printOperations();
+    conv.countNull();
+    cout << endl;
+
+    conv.halfFastFurieConvolution();
 
     conv.printFirst(conv.Nout);
     conv.printSecond(conv.Nout);
