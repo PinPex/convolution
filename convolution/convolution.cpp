@@ -158,13 +158,17 @@ public:
         Furie furA(this->Nout, a1);
         Furie furB(this->Nout, b1);
         furA.DFT();
+        //furA.printMas();
         furB.DFT();
+        //furB.printMas();
         furA.Mul(furB.mas);
+        //furA.printMas();
         furA.reverse_DFT();
+        //furA.printMas();
         for (int i = 0; i < this->Nout; ++i) {
             c[i] = furA.mas[i].real;
         }
-        count_operations = furA.count_operations + furB.count_operations + this->Nout;
+        count_operations = furA.count_operations;
     }
     void halfFastFurieConvolution() {
         double* a1 = makeZeros(a, size1);
@@ -172,19 +176,25 @@ public:
         Furie furA(this->Nout, a1);
         Furie furB(this->Nout, b1);
         furA.half_fast_furie();
+        //furA.printMas();
         furB.half_fast_furie();
+        //furB.printMas();
         furA.Mul(furB.mas);
+        //furA.printMas();
         furA.reverse_half_fast_furie();
+        //furA.printMas();
         for (int i = 0; i < this->Nout; ++i) {
             c[i] = furA.mas[i].real;
         }
-        count_operations = furA.count_operations + furB.count_operations + this->Nout;
+        count_operations = furA.count_operations;
     }
     void FastFurieConvolution() {
         double* a1 = makeZeros(a, size1);
         double* b1 = makeZeros(b, size1);
+        
         Furie furA(this->Nout, a1);
         Furie furB(this->Nout, b1);
+        
         furA.FFT(0);
         furB.FFT(0);
         furA.Mul(furB.mas);
@@ -192,7 +202,7 @@ public:
         for (int i = 0; i < this->Nout; ++i) {
             c[i] = furA.mas[i].real;
         }
-        count_operations = furA.count_operations + furB.count_operations + this->Nout;
+        count_operations = furA.count_operations;
     }
 
     
@@ -228,5 +238,16 @@ int main()
     conv.printOut();
     conv.printOperations();
     conv.countNull();
+    cout << endl;
+
+    conv.FastFurieConvolution();
+
+    conv.printFirst(conv.Nout);
+    conv.printSecond(conv.Nout);
+    conv.printOut();
+    conv.printOperations();
+    conv.countNull();
+
+
     
 }

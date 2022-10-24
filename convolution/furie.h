@@ -135,7 +135,7 @@ public:
         }
         delete[] A1;
         mas = A2;
-        count_operations = 5 * 3 * n * log2f(n);
+        
     }
 
     void reverse_half_fast_furie() {
@@ -176,7 +176,6 @@ public:
             }
         }
         delete[] A1;
-        count_operations = 5 * 3 * n * log2f(n);
         mas = A2;
     }
 
@@ -187,7 +186,7 @@ public:
         }
         complex* first = new complex[n / 2];
         complex* second = new complex[n / 2];
-        complex* output = new complex[n / 2];
+        complex* output = new complex[n];
 
         for (int i = 0; i < n / 2; i++) {
             first[i] = mas[2 * i];
@@ -207,8 +206,8 @@ public:
 
     bool is_exp_of_2(int n) { return (n & (n - 1)) == 0; }
 
-    complex* FFT(bool mode) {
-        if (!is_exp_of_2(n)) return NULL;
+    void FFT(bool mode) {
+        if (!is_exp_of_2(n)) return;
 
         if (mode) {
             for(int i = 0; i < n; ++i){
@@ -227,8 +226,11 @@ public:
             }
 
         }
-        count_operations = 5 * 3 * n * log2f(n);
-        return output;
+        for (int i = 0; i < n; ++i) {
+            mas[i] = output[i];
+        }
+        delete[] output;
+        //mas = output;
     }
 
 
@@ -261,7 +263,7 @@ public:
             mas[i].real = mas[i].real *  n;
             mas[i].im = mas[i].im *  n;
         }
-        count_operations += n * 3;
+        count_operations = 3 * 2 * n * log2f(2 * n) + 2 * n;
     }
 
 };
